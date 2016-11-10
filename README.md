@@ -27,6 +27,8 @@ Example Playbook
       - { role: kurron.rsync }
 ```
 
+Can test via `rsync -rdt rsync://192.168.1.233:873/`.
+
 License
 -------
 
