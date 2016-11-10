@@ -1,76 +1,26 @@
 ---
-- name: Create folders
-  become: no
-  file:
-      path: "{{item}}"
-      state: directory
-      mode: 0755
-      recurse: yes
-  with_items:
-  - "{{ansible_user_dir}}/{{resilio_sync_storage_dir}}"
-
-- name: Install Resilio Repository
+- name: Install Rsync Configuration File
   become: yes
-  apt_repository:
-      repo: 'deb http://linux-packages.resilio.com/resilio-sync/deb resilio-sync non-free'
-      state: present
-  when: (ansible_distribution == "Ubuntu") and (resilio_sync_install)
-
-- name: Install Resilio Repository
-  become: yes
-  copy:
-      src: files/resilio-sync.repo
-      dest: /etc/yum.repos.d/resilio-sync.repo
-      mode: 0444
-  when: (ansible_distribution == "Fedora") and (resilio_sync_install)
-
-- name: Install Resilio Key
-  become: yes
-  apt_key:
-      url: https://linux-packages.resilio.com/resilio-sync/key.asc
-      state: present
-  when: (ansible_distribution == "Ubuntu") and (resilio_sync_install)
-
-- name: Install Resilio Key
-  become: yes
-  command: rpm --import https://linux-packages.resilio.com/resilio-sync/key.asc
-  when: (ansible_distribution == "Fedora") and (resilio_sync_install)
-
-- name: Install Resilio Sync
-  become: yes
-  apt:
-      name: resilio-sync
-      update_cache: yes
-      state: present
-      allow_unauthenticated: yes
-  when: (ansible_distribution == "Ubuntu") and (resilio_sync_install)
-
-- name: Install Resilio Sync
-  become: yes
-  shell: dnf --assumeyes install resilio-sync
-  when: (ansible_distribution == "Fedora") and (resilio_sync_install)
-
-- name: Install Resilio Configuration File
-  become: no
   template:
-      src: templates/config.json.j2
-      dest: "{{ ansible_user_dir}}/{{ resilio_sync_configuration_dir }}/config.json"
-  when: resilio_sync_install
+      src: templates/rsyncd.conf.j2
+      dest: "/etc/rsyncd.conf"
+      mode: 0444
+  when: rsync_install
 
-- name: Reconfigure Systemd
+- name: Install Required Packages
   become: yes
-  lineinfile:
-      dest: /usr/lib/systemd/user/resilio-sync.service
-      regexp: WantedBy=multi-user.target
-      line: WantedBy=default.target
-  when: resilio_sync_install
+  package:
+      name: "{{item}}"
+      state: present
+  with_items:
+  - "rsync"
+  when: rsync_install
 
-- name: Enable Sync As Normal User
-  become: no
-  command: systemctl --user enable resilio-sync
-  when: resilio_sync_install
-
-- name: Start Sync As Normal User
-  become: no
-  command: systemctl --user restart resilio-sync
-  when: resilio_sync_install
+- name: Start Rsync
+  become: yes
+  systemd:
+      name: rsync
+      enabled: yes
+      daemon_reload: yes
+      state: restarted
+  when: rsync_install

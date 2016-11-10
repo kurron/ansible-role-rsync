@@ -1,6 +1,6 @@
 galaxy_info:
   author: Ronald D. Kurr
-  description: Resilio Sync, aka BitTorrent Sync.
+  description: Rsync server.
   company: jvmguy.com
 
   license: Apache 2
@@ -31,9 +31,7 @@ galaxy_info:
     - xenial
 
   galaxy_tags:
-      - peer-to-peer
-      - bit-torrent
-      - torrent
+      - rsync
 
 dependencies:
     - { role: kurron.base }

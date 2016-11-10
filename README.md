@@ -1,7 +1,7 @@
 Role Name
 =========
 
-The Resilio Sync service.
+An Rsync server that can be used to pull backups from.
 
 Requirements
 ------------
@@ -24,7 +24,7 @@ Example Playbook
 ```
 - hosts: servers
   roles:
-      - { role: kurron.resilio-sync }
+      - { role: kurron.rsync }
 ```
 
 License
